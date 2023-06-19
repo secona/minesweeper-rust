@@ -1,4 +1,5 @@
 use crate::Cell;
+use crate::Point;
 use rand::Rng;
 use std::fmt::Display;
 
@@ -40,19 +41,19 @@ impl Board {
         Ok(self)
     }
 
-    fn place_bombs(&mut self, bomb_count: usize) -> Result<Vec<(usize, usize)>, &'static str> {
+    fn place_bombs(&mut self, bomb_count: usize) -> Result<Vec<Point>, &'static str> {
         if bomb_count > (self.size * self.size) {
             return Err("bomb_count exceeded cell count.");
         }
 
-        let mut bomb_coords: Vec<(usize, usize)> = vec![];
+        let mut bomb_coords: Vec<Point> = vec![];
 
         for _ in 0..bomb_count {
             let mut rng = rand::thread_rng();
             let x = rng.gen_range(0..self.size);
             let y = rng.gen_range(0..self.size);
             self.cells[x][y] = Cell::Bomb;
-            bomb_coords.push((x, y));
+            bomb_coords.push(Point { x, y });
         }
 
         Ok(bomb_coords)
@@ -60,11 +61,11 @@ impl Board {
 
     fn increment_numbers_around_bombs(
         &mut self,
-        bomb_coords: Vec<(usize, usize)>,
+        bomb_coords: Vec<Point>,
     ) -> Result<(), &'static str> {
         for coord in bomb_coords {
-            let x: i32 = coord.0.try_into().unwrap();
-            let y: i32 = coord.1.try_into().unwrap();
+            let x: i32 = coord.x.try_into().unwrap();
+            let y: i32 = coord.y.try_into().unwrap();
 
             for i in -1..=1 {
                 for j in -1..=1 {
