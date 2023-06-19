@@ -48,12 +48,21 @@ impl Board {
 
         let mut bomb_coords: Vec<Point> = vec![];
 
-        for _ in 0..bomb_count {
+        loop {
             let mut rng = rand::thread_rng();
-            let x = rng.gen_range(0..self.size);
-            let y = rng.gen_range(0..self.size);
-            self.cells[x][y] = Cell::Bomb;
-            bomb_coords.push(Point { x, y });
+            let point = Point {
+                x: rng.gen_range(0..self.size),
+                y: rng.gen_range(0..self.size),
+            };
+
+            if !bomb_coords.contains(&point) {
+                self.cells[point.x][point.y] = Cell::Bomb;
+                bomb_coords.push(point);
+            }
+
+            if bomb_coords.len() >= bomb_count {
+                break;
+            }
         }
 
         Ok(bomb_coords)
