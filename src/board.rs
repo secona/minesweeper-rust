@@ -64,28 +64,19 @@ impl Board {
         bomb_coords: Vec<Point>,
     ) -> Result<(), &'static str> {
         for coord in bomb_coords {
-            let x: i32 = coord.x.try_into().unwrap();
-            let y: i32 = coord.y.try_into().unwrap();
-
             for i in -1..=1 {
                 for j in -1..=1 {
-                    let x_to_change: usize = match x + i {
-                        d if d < 0 => continue,
-                        d if d >= self.size.try_into().unwrap() => continue,
-                        _ => (x + i).try_into().unwrap(),
-                    };
+                    let coord = coord
+                        .offset(&Point { x: i, y: j })
+                        .and_then(|offseted| offseted.limit(self.size));
 
-                    let y_to_change: usize = match y + j {
-                        d if d < 0 => continue,
-                        d if d >= self.size.try_into().unwrap() => continue,
-                        _ => (y + j).try_into().unwrap(),
-                    };
-
-                    let current_cell = &mut self.cells[x_to_change][y_to_change];
-                    *current_cell = match current_cell {
-                        Cell::Number(n) => Cell::Number(*n + 1),
-                        Cell::Bomb => continue,
-                    };
+                    if let Some(Point { x, y }) = coord {
+                        let current_cell = &mut self.cells[x][y];
+                        *current_cell = match current_cell {
+                            Cell::Number(n) => Cell::Number(*n + 1),
+                            Cell::Bomb => continue,
+                        };
+                    }
                 }
             }
         }
