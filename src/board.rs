@@ -10,18 +10,14 @@ pub struct Board {
 
 impl Display for Board {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut result: Vec<String> = vec![];
-        for row in self.cells.clone().into_iter() {
-            let mut line: Vec<String> = vec![];
-            for cell in row {
-                let value = match cell {
-                    Cell::Number(num) => num.to_string(),
-                    Cell::Bomb => String::from("X"),
-                };
-                line.push(value);
-            }
-            result.push(line.join(" "));
-        }
+        let result: Vec<String> = self
+            .cells
+            .iter()
+            .map(|row| {
+                let row: Vec<String> = row.iter().map(|cell| cell.to_string()).collect();
+                row.join(" ")
+            })
+            .collect();
 
         write!(f, "{}", result.join("\n"))
     }
