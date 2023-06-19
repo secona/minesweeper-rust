@@ -1,3 +1,6 @@
+use minesweeper::Board;
+
 fn main() {
-    println!("Hello, world!");
+    let board = Board::new(10);
+    println!("{board}");
 }
