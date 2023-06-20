@@ -8,7 +8,7 @@ fn main() {
         process::exit(1);
     });
 
-    let game = Game::new(board).unwrap_or_else(|err| {
+    let mut game = Game::new(board).unwrap_or_else(|err| {
         eprintln!("Problem initiating game: {err}");
         process::exit(1);
     });

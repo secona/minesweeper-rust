@@ -1,27 +1,11 @@
 use crate::components::Cell;
 use crate::components::Point;
 use rand::Rng;
-use std::fmt::Display;
 
 pub struct Board {
     pub cells: Vec<Vec<Cell>>,
     pub size: usize,
     pub bomb_coords: Vec<Point>,
-}
-
-impl Display for Board {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let result: Vec<String> = self
-            .cells
-            .iter()
-            .map(|row| {
-                let row: Vec<String> = row.iter().map(|cell| cell.to_string()).collect();
-                row.join(" ")
-            })
-            .collect();
-
-        write!(f, "{}", result.join("\r\n"))
-    }
 }
 
 impl Board {
