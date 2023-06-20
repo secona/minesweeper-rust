@@ -1,3 +1,4 @@
+use crate::components::cell_state::CellState;
 use crate::components::Board;
 use crate::components::Point;
 use std::fmt::Display;
@@ -16,27 +17,32 @@ pub struct Game {
 
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut row: Vec<String> = vec![];
+        let mut result: Vec<String> = vec![];
 
-        for j in 0..self.board.grid.len() {
-            let mut col: Vec<String> = vec![];
-            for i in 0..self.board.grid[j].len() {
-                let value = self.board.grid[j][i].value.to_string();
-                col.push(if self.cursor_coord == (Point { x: i, y: j }) {
+        for (j, row) in self.board.grid.iter().enumerate() {
+            let mut row_result: Vec<String> = vec![];
+            for (i, cell) in row.iter().enumerate() {
+                let c: String = match cell.state {
+                    CellState::Default => String::from("?"),
+                    CellState::Revealed => cell.value.to_string(),
+                    CellState::Flagged => String::from("F"),
+                };
+
+                row_result.push(if (Point { x: i, y: j }) == self.cursor_coord {
                     format!(
                         "{}{}{}",
                         color::Bg(color::Yellow),
-                        value,
+                        c,
                         color::Bg(color::Reset)
                     )
                 } else {
-                    value
-                });
+                    c
+                })
             }
-            row.push(col.join(" "));
+            result.push(row_result.join(" "));
         }
 
-        write!(f, "{}", row.join("\r\n"))
+        write!(f, "{}", result.join("\r\n"))
     }
 }
 
@@ -71,8 +77,8 @@ impl Game {
                 Key::Right => self.move_cursor(&Point { x: 1, y: 0 }),
                 Key::Up => self.move_cursor(&Point { x: 0, y: -1 }),
                 Key::Down => self.move_cursor(&Point { x: 0, y: 1 }),
-                Key::Char(' ') => println!("Reveal"),
-                Key::Char('F') | Key::Char('f') => println!("Flag"),
+                Key::Char(' ') => self.edit_on_cursor(CellState::Revealed),
+                Key::Char('F') | Key::Char('f') => self.edit_on_cursor(CellState::Flagged),
                 Key::Char('Q') | Key::Char('q') | Key::Ctrl('C') | Key::Ctrl('c') => break,
                 _ => {}
             }
@@ -93,5 +99,10 @@ impl Game {
         if let Some(point) = new_coord {
             self.cursor_coord = point;
         }
+    }
+
+    fn edit_on_cursor(&mut self, state: CellState) {
+        let Point { x, y } = self.cursor_coord;
+        self.board.grid[y][x].state = state;
     }
 }
