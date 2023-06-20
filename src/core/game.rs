@@ -1,4 +1,5 @@
 use crate::components::cell_state::CellState;
+use crate::components::cell_value::CellValue;
 use crate::components::Board;
 use crate::components::Point;
 use std::fmt::Display;
@@ -77,8 +78,8 @@ impl Game {
                 Key::Right => self.move_cursor(&Point { x: 1, y: 0 }),
                 Key::Up => self.move_cursor(&Point { x: 0, y: -1 }),
                 Key::Down => self.move_cursor(&Point { x: 0, y: 1 }),
-                Key::Char(' ') => self.edit_on_cursor(CellState::Revealed),
-                Key::Char('F') | Key::Char('f') => self.edit_on_cursor(CellState::Flagged),
+                Key::Char(' ') => self.reveal_selected(),
+                Key::Char('F') | Key::Char('f') => self.flag_selected(),
                 Key::Char('Q') | Key::Char('q') | Key::Ctrl('C') | Key::Ctrl('c') => break,
                 _ => {}
             }
@@ -101,8 +102,41 @@ impl Game {
         }
     }
 
-    fn edit_on_cursor(&mut self, state: CellState) {
-        let Point { x, y } = self.cursor_coord;
-        self.board.grid[y][x].state = state;
+    fn edit(&mut self, point: Point, state: CellState) {
+        self.board.grid[point.y][point.x].state = state;
+    }
+
+    fn reveal(&mut self, point: Point) {
+        let current_cell = &mut self.board.grid[point.y][point.x];
+        current_cell.state = CellState::Revealed;
+
+        if current_cell.value == CellValue::Number(0) {
+            for i in -1..=1 {
+                for j in -1..=1 {
+                    match point
+                        .offset(&Point { x: i, y: j })
+                        .and_then(|o| o.limit(self.board.size))
+                    {
+                        None => {}
+                        Some(neighbor_point) => {
+                            let cell = &self.board.grid[neighbor_point.y][neighbor_point.x];
+                            if CellState::Default == cell.state {
+                                if CellValue::Bomb != cell.value {
+                                    self.reveal(neighbor_point)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn reveal_selected(&mut self) {
+        self.reveal(self.cursor_coord);
+    }
+
+    fn flag_selected(&mut self) {
+        self.edit(self.cursor_coord, CellState::Flagged);
     }
 }

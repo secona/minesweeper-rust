@@ -4,3 +4,9 @@ pub enum CellState {
     Revealed,
     Flagged,
 }
+
+impl CellState {
+    pub fn reveal(&mut self) {
+        *self = CellState::Revealed;
+    }
+}
