@@ -85,3 +85,56 @@ impl Board {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_works() {
+        let board = Board::new(3);
+
+        assert_eq!(board.bomb_coords, vec![]);
+        assert_eq!(board.size, 3);
+        assert_eq!(
+            board.cells,
+            vec![
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)]
+            ]
+        );
+    }
+
+    #[test]
+    fn place_bombs_works() {
+        let mut board = Board::new(3);
+        let _ = board.place_bombs(3);
+        for coord in board.bomb_coords {
+            assert_eq!(board.cells[coord.x][coord.y], Cell::Bomb);
+        }
+    }
+
+    #[test]
+    fn increment_numbers_around_bombs_works() {
+        let mut board = Board {
+            cells: vec![
+                vec![Cell::Bomb, Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Bomb],
+            ],
+            size: 3,
+            bomb_coords: vec![Point { x: 0, y: 0 }, Point { x: 2, y: 2 }],
+        };
+
+        let _ = board.increment_numbers_around_bombs();
+        assert_eq!(
+            board.cells,
+            vec![
+                vec![Cell::Bomb, Cell::Number(1), Cell::Number(0)],
+                vec![Cell::Number(1), Cell::Number(2), Cell::Number(1)],
+                vec![Cell::Number(0), Cell::Number(1), Cell::Bomb],
+            ],
+        )
+    }
+}
