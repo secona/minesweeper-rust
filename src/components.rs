@@ -3,5 +3,5 @@ mod cell;
 mod point;
 
 pub use board::Board;
-pub use cell::Cell;
+pub use cell::CellValue;
 pub use point::Point;
