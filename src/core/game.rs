@@ -79,7 +79,7 @@ impl Game {
                 Key::Up => self.move_cursor(&Point { x: 0, y: -1 }),
                 Key::Down => self.move_cursor(&Point { x: 0, y: 1 }),
                 Key::Char(' ') => self.reveal_selected(),
-                Key::Char('F') | Key::Char('f') => self.flag_selected(),
+                Key::Char('F') | Key::Char('f') => self.toggle_flag(),
                 Key::Char('Q') | Key::Char('q') | Key::Ctrl('C') | Key::Ctrl('c') => break,
                 _ => {}
             }
@@ -99,12 +99,12 @@ impl Game {
         }
     }
 
-    fn edit(&mut self, point: Point, state: CellState) {
-        self.board.grid[point.y][point.x].state = state;
-    }
-
     fn reveal(&mut self, point: Point) {
         let current_cell = &mut self.board.grid[point.y][point.x];
+        if current_cell.state == CellState::Flagged {
+            return;
+        }
+
         current_cell.state = CellState::Revealed;
 
         if current_cell.value == CellValue::Number(0) {
@@ -123,7 +123,13 @@ impl Game {
         self.reveal(self.cursor_coord);
     }
 
-    fn flag_selected(&mut self) {
-        self.edit(self.cursor_coord, CellState::Flagged);
+    fn toggle_flag(&mut self) {
+        let current_cell = &mut self.board.grid[self.cursor_coord.y][self.cursor_coord.x];
+
+        current_cell.state = match current_cell.state {
+            CellState::Default => CellState::Flagged,
+            CellState::Flagged => CellState::Default,
+            _ => current_cell.state,
+        }
     }
 }
