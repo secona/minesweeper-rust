@@ -53,17 +53,11 @@ impl Board {
     }
 
     fn increment_numbers_around_bombs(&mut self) -> Result<(), &'static str> {
-        for coord in &self.bomb_coords {
-            for i in -1..=1 {
-                for j in -1..=1 {
-                    let coord = coord
-                        .offset(&Point { x: i, y: j })
-                        .and_then(|offseted| offseted.limit(self.size));
-
-                    if let Some(Point { x, y }) = coord {
-                        self.grid[y][x].value.increment_if_number(1);
-                    }
-                }
+        for bomb_coord in &self.bomb_coords {
+            for neighbor_coord in bomb_coord.neighboring_points(self.size) {
+                self.grid[neighbor_coord.y][neighbor_coord.x]
+                    .value
+                    .increment_if_number(1);
             }
         }
 

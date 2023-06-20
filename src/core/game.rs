@@ -92,10 +92,7 @@ impl Game {
     }
 
     fn move_cursor(&mut self, value: &Point<i32>) {
-        let new_coord = self
-            .cursor_coord
-            .offset(value)
-            .and_then(|offseted| offseted.limit(self.board.size));
+        let new_coord = self.cursor_coord.offset_and_limit(value, self.board.size);
 
         if let Some(point) = new_coord {
             self.cursor_coord = point;
@@ -111,21 +108,11 @@ impl Game {
         current_cell.state = CellState::Revealed;
 
         if current_cell.value == CellValue::Number(0) {
-            for i in -1..=1 {
-                for j in -1..=1 {
-                    match point
-                        .offset(&Point { x: i, y: j })
-                        .and_then(|o| o.limit(self.board.size))
-                    {
-                        None => {}
-                        Some(neighbor_point) => {
-                            let cell = &self.board.grid[neighbor_point.y][neighbor_point.x];
-                            if CellState::Default == cell.state {
-                                if CellValue::Bomb != cell.value {
-                                    self.reveal(neighbor_point)
-                                }
-                            }
-                        }
+            for neighbor_coord in point.neighboring_points(self.board.size) {
+                let cell = &self.board.grid[neighbor_coord.y][neighbor_coord.x];
+                if CellState::Default == cell.state {
+                    if CellValue::Bomb != cell.value {
+                        self.reveal(neighbor_coord)
                     }
                 }
             }
