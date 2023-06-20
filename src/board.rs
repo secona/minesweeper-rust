@@ -20,7 +20,7 @@ impl Display for Board {
             })
             .collect();
 
-        write!(f, "{}", result.join("\n"))
+        write!(f, "{}", result.join("\r\n"))
     }
 }
 
