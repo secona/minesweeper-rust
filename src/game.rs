@@ -1,4 +1,4 @@
-use crate::Board;
+use crate::components::Board;
 use std::io::{stdin, stdout, Write};
 use termion::clear;
 use termion::cursor;

@@ -1,5 +1,5 @@
-use crate::Cell;
-use crate::Point;
+use crate::components::Cell;
+use crate::components::Point;
 use rand::Rng;
 use std::fmt::Display;
 
