@@ -18,10 +18,10 @@ impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut row: Vec<String> = vec![];
 
-        for i in 0..self.board.cells.len() {
+        for j in 0..self.board.cells.len() {
             let mut col: Vec<String> = vec![];
-            for j in 0..self.board.cells[i].len() {
-                let value = self.board.cells[i][j].to_string();
+            for i in 0..self.board.cells[j].len() {
+                let value = self.board.cells[j][i].to_string();
                 col.push(if self.cursor_coord == (Point { x: i, y: j }) {
                     format!(
                         "{}{}{}",
@@ -69,8 +69,8 @@ impl Game {
             match c.unwrap() {
                 Key::Left => self.move_cursor(&Point { x: -1, y: 0 }),
                 Key::Right => self.move_cursor(&Point { x: 1, y: 0 }),
-                Key::Up => self.move_cursor(&Point { x: 0, y: 1 }),
-                Key::Down => self.move_cursor(&Point { x: 0, y: -1 }),
+                Key::Up => self.move_cursor(&Point { x: 0, y: -1 }),
+                Key::Down => self.move_cursor(&Point { x: 0, y: 1 }),
                 Key::Char(' ') => println!("Reveal"),
                 Key::Char('F') | Key::Char('f') => println!("Flag"),
                 Key::Char('Q') | Key::Char('q') | Key::Ctrl('C') | Key::Ctrl('c') => break,

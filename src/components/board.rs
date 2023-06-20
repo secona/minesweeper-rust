@@ -39,7 +39,7 @@ impl Board {
             };
 
             if !self.bomb_coords.contains(&point) {
-                self.cells[point.x][point.y] = Cell::Bomb;
+                self.cells[point.y][point.x] = Cell::Bomb;
                 self.bomb_coords.push(point);
             }
 
@@ -60,7 +60,7 @@ impl Board {
                         .and_then(|offseted| offseted.limit(self.size));
 
                     if let Some(Point { x, y }) = coord {
-                        self.cells[x][y].increment_if_number(1);
+                        self.cells[y][x].increment_if_number(1);
                     }
                 }
             }
@@ -95,7 +95,7 @@ mod tests {
         let mut board = Board::new(3);
         let _ = board.place_bombs(3);
         for coord in board.bomb_coords {
-            assert_eq!(board.cells[coord.x][coord.y], Cell::Bomb);
+            assert_eq!(board.cells[coord.y][coord.x], Cell::Bomb);
         }
     }
 
