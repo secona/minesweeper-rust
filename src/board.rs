@@ -76,11 +76,7 @@ impl Board {
                         .and_then(|offseted| offseted.limit(self.size));
 
                     if let Some(Point { x, y }) = coord {
-                        let current_cell = &mut self.cells[x][y];
-                        *current_cell = match current_cell {
-                            Cell::Number(n) => Cell::Number(*n + 1),
-                            Cell::Bomb => continue,
-                        };
+                        self.cells[x][y].increment_if_number(1);
                     }
                 }
             }
