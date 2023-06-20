@@ -1,4 +1,4 @@
-use super::cell::CellValue;
+use super::cell_value::CellValue;
 use crate::components::Cell;
 use crate::components::Point;
 use rand::Rng;
