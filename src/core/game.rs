@@ -18,10 +18,10 @@ impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut row: Vec<String> = vec![];
 
-        for j in 0..self.board.cells.len() {
+        for j in 0..self.board.grid.len() {
             let mut col: Vec<String> = vec![];
-            for i in 0..self.board.cells[j].len() {
-                let value = self.board.cells[j][i].to_string();
+            for i in 0..self.board.grid[j].len() {
+                let value = self.board.grid[j][i].value.to_string();
                 col.push(if self.cursor_coord == (Point { x: i, y: j }) {
                     format!(
                         "{}{}{}",

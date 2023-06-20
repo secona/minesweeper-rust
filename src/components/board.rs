@@ -1,19 +1,20 @@
+use super::cell::CellValue;
 use crate::components::Cell;
 use crate::components::Point;
 use rand::Rng;
 
 pub struct Board {
-    pub cells: Vec<Vec<Cell>>,
+    pub grid: Vec<Vec<Cell>>,
     pub size: usize,
     pub bomb_coords: Vec<Point>,
 }
 
 impl Board {
     pub fn new(size: usize) -> Board {
-        let cells = vec![vec![Cell::Number(0); size]; size];
+        let grid = vec![vec![Cell::default(); size]; size];
 
         Board {
-            cells,
+            grid,
             size,
             bomb_coords: vec![],
         }
@@ -39,7 +40,7 @@ impl Board {
             };
 
             if !self.bomb_coords.contains(&point) {
-                self.cells[point.y][point.x] = Cell::Bomb;
+                self.grid[point.y][point.x].value = CellValue::Bomb;
                 self.bomb_coords.push(point);
             }
 
@@ -60,7 +61,7 @@ impl Board {
                         .and_then(|offseted| offseted.limit(self.size));
 
                     if let Some(Point { x, y }) = coord {
-                        self.cells[y][x].increment_if_number(1);
+                        self.grid[y][x].value.increment_if_number(1);
                     }
                 }
             }
@@ -81,11 +82,11 @@ mod tests {
         assert_eq!(board.bomb_coords, vec![]);
         assert_eq!(board.size, 3);
         assert_eq!(
-            board.cells,
+            board.grid,
             vec![
-                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
-                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
-                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)]
+                vec![Cell::default(), Cell::default(), Cell::default()],
+                vec![Cell::default(), Cell::default(), Cell::default()],
+                vec![Cell::default(), Cell::default(), Cell::default()]
             ]
         );
     }
@@ -95,17 +96,17 @@ mod tests {
         let mut board = Board::new(3);
         let _ = board.place_bombs(3);
         for coord in board.bomb_coords {
-            assert_eq!(board.cells[coord.y][coord.x], Cell::Bomb);
+            assert_eq!(board.grid[coord.y][coord.x], Cell::bomb());
         }
     }
 
     #[test]
     fn increment_numbers_around_bombs_works() {
         let mut board = Board {
-            cells: vec![
-                vec![Cell::Bomb, Cell::Number(0), Cell::Number(0)],
-                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
-                vec![Cell::Number(0), Cell::Number(0), Cell::Bomb],
+            grid: vec![
+                vec![Cell::bomb(), Cell::default(), Cell::default()],
+                vec![Cell::default(), Cell::default(), Cell::default()],
+                vec![Cell::default(), Cell::default(), Cell::bomb()],
             ],
             size: 3,
             bomb_coords: vec![Point { x: 0, y: 0 }, Point { x: 2, y: 2 }],
@@ -113,11 +114,11 @@ mod tests {
 
         let _ = board.increment_numbers_around_bombs();
         assert_eq!(
-            board.cells,
+            board.grid,
             vec![
-                vec![Cell::Bomb, Cell::Number(1), Cell::Number(0)],
-                vec![Cell::Number(1), Cell::Number(2), Cell::Number(1)],
-                vec![Cell::Number(0), Cell::Number(1), Cell::Bomb],
+                vec![Cell::bomb(), Cell::default(), Cell::default()],
+                vec![Cell::default(), Cell::default(), Cell::default()],
+                vec![Cell::default(), Cell::default(), Cell::bomb()],
             ],
         )
     }
