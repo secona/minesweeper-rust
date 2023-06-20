@@ -11,7 +11,7 @@ pub struct Board {
 
 impl Board {
     pub fn new(size: usize) -> Board {
-        let grid = vec![vec![Cell::default(); size]; size];
+        let grid = vec![vec![Cell::number(0); size]; size];
 
         Board {
             grid,
@@ -84,9 +84,9 @@ mod tests {
         assert_eq!(
             board.grid,
             vec![
-                vec![Cell::default(), Cell::default(), Cell::default()],
-                vec![Cell::default(), Cell::default(), Cell::default()],
-                vec![Cell::default(), Cell::default(), Cell::default()]
+                vec![Cell::number(0), Cell::number(0), Cell::number(0)],
+                vec![Cell::number(0), Cell::number(0), Cell::number(0)],
+                vec![Cell::number(0), Cell::number(0), Cell::number(0)]
             ]
         );
     }
@@ -104,9 +104,9 @@ mod tests {
     fn increment_numbers_around_bombs_works() {
         let mut board = Board {
             grid: vec![
-                vec![Cell::bomb(), Cell::default(), Cell::default()],
-                vec![Cell::default(), Cell::default(), Cell::default()],
-                vec![Cell::default(), Cell::default(), Cell::bomb()],
+                vec![Cell::bomb(), Cell::number(0), Cell::number(0)],
+                vec![Cell::number(0), Cell::number(0), Cell::number(0)],
+                vec![Cell::number(0), Cell::number(0), Cell::bomb()],
             ],
             size: 3,
             bomb_coords: vec![Point { x: 0, y: 0 }, Point { x: 2, y: 2 }],
@@ -116,9 +116,9 @@ mod tests {
         assert_eq!(
             board.grid,
             vec![
-                vec![Cell::bomb(), Cell::default(), Cell::default()],
-                vec![Cell::default(), Cell::default(), Cell::default()],
-                vec![Cell::default(), Cell::default(), Cell::bomb()],
+                vec![Cell::bomb(), Cell::number(1), Cell::number(0)],
+                vec![Cell::number(1), Cell::number(2), Cell::number(1)],
+                vec![Cell::number(0), Cell::number(1), Cell::bomb()],
             ],
         )
     }

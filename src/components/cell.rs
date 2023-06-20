@@ -7,13 +7,6 @@ pub struct Cell {
 }
 
 impl Cell {
-    pub fn default() -> Self {
-        Self {
-            state: CellState::Default,
-            value: CellValue::Number(0),
-        }
-    }
-
     pub fn number(number: i32) -> Self {
         Self {
             state: CellState::Default,
