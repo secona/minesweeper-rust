@@ -6,6 +6,7 @@ use std::fmt::Display;
 pub struct Board {
     pub cells: Vec<Vec<Cell>>,
     pub size: usize,
+    pub bomb_coords: Vec<Point>,
 }
 
 impl Display for Board {
@@ -27,22 +28,24 @@ impl Board {
     pub fn new(size: usize) -> Board {
         let cells = vec![vec![Cell::Number(0); size]; size];
 
-        Board { cells, size }
+        Board {
+            cells,
+            size,
+            bomb_coords: vec![],
+        }
     }
 
     pub fn populate(mut self, bomb_count: usize) -> Result<Board, &'static str> {
-        let bomb_coords = self.place_bombs(bomb_count)?;
-        self.increment_numbers_around_bombs(bomb_coords)?;
+        self.place_bombs(bomb_count)?;
+        self.increment_numbers_around_bombs()?;
 
         Ok(self)
     }
 
-    fn place_bombs(&mut self, bomb_count: usize) -> Result<Vec<Point>, &'static str> {
+    fn place_bombs(&mut self, bomb_count: usize) -> Result<(), &'static str> {
         if bomb_count > (self.size * self.size) {
             return Err("bomb_count exceeded cell count.");
         }
-
-        let mut bomb_coords: Vec<Point> = vec![];
 
         loop {
             let mut rng = rand::thread_rng();
@@ -51,24 +54,21 @@ impl Board {
                 y: rng.gen_range(0..self.size),
             };
 
-            if !bomb_coords.contains(&point) {
+            if !self.bomb_coords.contains(&point) {
                 self.cells[point.x][point.y] = Cell::Bomb;
-                bomb_coords.push(point);
+                self.bomb_coords.push(point);
             }
 
-            if bomb_coords.len() >= bomb_count {
+            if self.bomb_coords.len() >= bomb_count {
                 break;
             }
         }
 
-        Ok(bomb_coords)
+        Ok(())
     }
 
-    fn increment_numbers_around_bombs(
-        &mut self,
-        bomb_coords: Vec<Point>,
-    ) -> Result<(), &'static str> {
-        for coord in bomb_coords {
+    fn increment_numbers_around_bombs(&mut self) -> Result<(), &'static str> {
+        for coord in &self.bomb_coords {
             for i in -1..=1 {
                 for j in -1..=1 {
                     let coord = coord
