@@ -1,5 +1,5 @@
-use minesweeper::components::Board;
-use minesweeper::core::Game;
+use minesweeper::Board;
+use minesweeper::Game;
 use std::process;
 
 fn main() {
