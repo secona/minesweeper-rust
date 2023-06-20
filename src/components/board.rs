@@ -1,16 +1,16 @@
-use crate::components::CellValue;
+use crate::components::Cell;
 use crate::components::Point;
 use rand::Rng;
 
 pub struct Board {
-    pub cells: Vec<Vec<CellValue>>,
+    pub cells: Vec<Vec<Cell>>,
     pub size: usize,
     pub bomb_coords: Vec<Point>,
 }
 
 impl Board {
     pub fn new(size: usize) -> Board {
-        let cells = vec![vec![CellValue::Number(0); size]; size];
+        let cells = vec![vec![Cell::Number(0); size]; size];
 
         Board {
             cells,
@@ -39,7 +39,7 @@ impl Board {
             };
 
             if !self.bomb_coords.contains(&point) {
-                self.cells[point.y][point.x] = CellValue::Bomb;
+                self.cells[point.y][point.x] = Cell::Bomb;
                 self.bomb_coords.push(point);
             }
 
@@ -83,21 +83,9 @@ mod tests {
         assert_eq!(
             board.cells,
             vec![
-                vec![
-                    CellValue::Number(0),
-                    CellValue::Number(0),
-                    CellValue::Number(0)
-                ],
-                vec![
-                    CellValue::Number(0),
-                    CellValue::Number(0),
-                    CellValue::Number(0)
-                ],
-                vec![
-                    CellValue::Number(0),
-                    CellValue::Number(0),
-                    CellValue::Number(0)
-                ]
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)]
             ]
         );
     }
@@ -107,7 +95,7 @@ mod tests {
         let mut board = Board::new(3);
         let _ = board.place_bombs(3);
         for coord in board.bomb_coords {
-            assert_eq!(board.cells[coord.y][coord.x], CellValue::Bomb);
+            assert_eq!(board.cells[coord.y][coord.x], Cell::Bomb);
         }
     }
 
@@ -115,13 +103,9 @@ mod tests {
     fn increment_numbers_around_bombs_works() {
         let mut board = Board {
             cells: vec![
-                vec![CellValue::Bomb, CellValue::Number(0), CellValue::Number(0)],
-                vec![
-                    CellValue::Number(0),
-                    CellValue::Number(0),
-                    CellValue::Number(0),
-                ],
-                vec![CellValue::Number(0), CellValue::Number(0), CellValue::Bomb],
+                vec![Cell::Bomb, Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Number(0)],
+                vec![Cell::Number(0), Cell::Number(0), Cell::Bomb],
             ],
             size: 3,
             bomb_coords: vec![Point { x: 0, y: 0 }, Point { x: 2, y: 2 }],
@@ -131,13 +115,9 @@ mod tests {
         assert_eq!(
             board.cells,
             vec![
-                vec![CellValue::Bomb, CellValue::Number(1), CellValue::Number(0)],
-                vec![
-                    CellValue::Number(1),
-                    CellValue::Number(2),
-                    CellValue::Number(1)
-                ],
-                vec![CellValue::Number(0), CellValue::Number(1), CellValue::Bomb],
+                vec![Cell::Bomb, Cell::Number(1), Cell::Number(0)],
+                vec![Cell::Number(1), Cell::Number(2), Cell::Number(1)],
+                vec![Cell::Number(0), Cell::Number(1), Cell::Bomb],
             ],
         )
     }
