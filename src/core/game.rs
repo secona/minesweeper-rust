@@ -3,6 +3,7 @@ use crate::components::cell_value::CellValue;
 use crate::components::Board;
 use crate::components::Point;
 use crate::util::colors::color_bg;
+use crate::util::colors::color_fg;
 use std::fmt::Display;
 use std::io::{stdin, stdout, Write};
 use termion::clear;
@@ -25,9 +26,9 @@ impl Display for Game {
             let mut row_result: Vec<String> = vec![];
             for (i, cell) in row.iter().enumerate() {
                 let c: String = match cell.state {
-                    CellState::Default => String::from("?"),
+                    CellState::Default => color_fg(String::from("?"), color::LightRed),
                     CellState::Revealed => cell.value.to_string_colored(),
-                    CellState::Flagged => String::from("F"),
+                    CellState::Flagged => color_fg(String::from("F"), color::Rgb(128, 0, 128)),
                 };
 
                 row_result.push(if (Point { x: i, y: j }) == self.cursor_coord {

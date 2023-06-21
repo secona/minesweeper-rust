@@ -31,7 +31,7 @@ impl CellValue {
                 8 => color_fg(value, color::White),
                 _ => value,
             },
-            CellValue::Bomb => value,
+            CellValue::Bomb => color_fg(value, color::LightYellow),
         }
     }
 
