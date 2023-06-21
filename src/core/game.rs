@@ -2,6 +2,7 @@ use crate::components::cell_state::CellState;
 use crate::components::cell_value::CellValue;
 use crate::components::Board;
 use crate::components::Point;
+use crate::util::colors::color_bg;
 use std::fmt::Display;
 use std::io::{stdin, stdout, Write};
 use termion::clear;
@@ -25,17 +26,12 @@ impl Display for Game {
             for (i, cell) in row.iter().enumerate() {
                 let c: String = match cell.state {
                     CellState::Default => String::from("?"),
-                    CellState::Revealed => cell.value.to_string(),
+                    CellState::Revealed => cell.value.to_string_colored(),
                     CellState::Flagged => String::from("F"),
                 };
 
                 row_result.push(if (Point { x: i, y: j }) == self.cursor_coord {
-                    format!(
-                        "{}{}{}",
-                        color::Bg(color::Yellow),
-                        c,
-                        color::Bg(color::Reset)
-                    )
+                    color_bg(c, color::LightBlack)
                 } else {
                     c
                 })

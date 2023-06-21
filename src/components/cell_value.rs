@@ -1,3 +1,6 @@
+use crate::util::colors::color_fg;
+use termion::color;
+
 #[derive(Clone, PartialEq, Debug)]
 pub enum CellValue {
     Number(i32),
@@ -9,6 +12,26 @@ impl CellValue {
         match self {
             CellValue::Number(num) => num.to_string(),
             CellValue::Bomb => String::from("X"),
+        }
+    }
+
+    pub fn to_string_colored(&self) -> String {
+        let value = self.to_string();
+
+        match self {
+            CellValue::Number(n) => match n {
+                0 => String::from(" "), // transparent color
+                1 => color_fg(value, color::LightBlue),
+                2 => color_fg(value, color::Green),
+                3 => color_fg(value, color::Red),
+                4 => color_fg(value, color::Blue),
+                5 => color_fg(value, color::Magenta),
+                6 => color_fg(value, color::Cyan),
+                7 => color_fg(value, color::LightCyan),
+                8 => color_fg(value, color::White),
+                _ => value,
+            },
+            CellValue::Bomb => value,
         }
     }
 
