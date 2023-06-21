@@ -4,73 +4,54 @@ use crate::components::Board;
 use crate::components::Point;
 use crate::util::colors::color_bg;
 use crate::util::colors::color_fg;
-use std::fmt::Display;
-use std::io::{stdin, stdout, Write};
+use std::io;
+use std::io::Write;
 use termion::clear;
 use termion::color;
 use termion::cursor;
 use termion::event::Key;
+use termion::input::Keys;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
+use termion::raw::RawTerminal;
 
 pub struct Game {
     pub board: Board,
     pub cursor_coord: Point,
-}
-
-impl Display for Game {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut result: Vec<String> = vec![];
-
-        for (j, row) in self.board.grid.iter().enumerate() {
-            let mut row_result: Vec<String> = vec![];
-            for (i, cell) in row.iter().enumerate() {
-                let c: String = match cell.state {
-                    CellState::Default => color_fg(String::from("?"), color::LightRed),
-                    CellState::Revealed => cell.value.to_string_colored(),
-                    CellState::Flagged => color_fg(String::from("F"), color::Rgb(128, 0, 128)),
-                };
-
-                row_result.push(if (Point { x: i, y: j }) == self.cursor_coord {
-                    color_bg(c, color::LightBlack)
-                } else {
-                    c
-                })
-            }
-            result.push(row_result.join(" "));
-        }
-
-        write!(f, "{}", result.join("\r\n"))
-    }
+    stdin: Keys<io::Stdin>,
+    stdout: RawTerminal<io::Stdout>,
 }
 
 impl Game {
     pub fn new(board: Board) -> Result<Game, &'static str> {
+        let stdin = io::stdin().keys();
+        let stdout = io::stdout().into_raw_mode().unwrap();
+
         Ok(Game {
             board,
             cursor_coord: Point { x: 0, y: 0 },
+            stdin,
+            stdout,
         })
     }
 
     pub fn play(&mut self) {
-        let stdin = stdin();
-        let mut stdout = stdout().into_raw_mode().unwrap();
-
         write!(
-            stdout,
+            self.stdout,
             "{}{}{}{}",
             clear::All,
             cursor::Goto(1, 1),
             cursor::Hide,
-            self
+            self.display()
         )
         .unwrap();
-        stdout.flush().unwrap();
+        self.stdout.flush().unwrap();
 
-        for c in stdin.keys() {
-            write!(stdout, "{}{}", cursor::Goto(1, 1), clear::AfterCursor).unwrap();
+        loop {
+            let c = self.stdin.next().unwrap().unwrap();
+            write!(self.stdout, "{}{}", cursor::Goto(1, 1), clear::AfterCursor).unwrap();
 
-            match c.unwrap() {
+            match c {
                 Key::Left => self.move_cursor(&Point { x: -1, y: 0 }),
                 Key::Right => self.move_cursor(&Point { x: 1, y: 0 }),
                 Key::Up => self.move_cursor(&Point { x: 0, y: -1 }),
@@ -81,11 +62,11 @@ impl Game {
                 _ => {}
             }
 
-            write!(stdout, "{}", self).unwrap();
-            stdout.flush().unwrap();
+            write!(self.stdout, "{}", self.display()).unwrap();
+            self.stdout.flush().unwrap();
         }
 
-        write!(stdout, "{}", termion::cursor::Show).unwrap();
+        write!(self.stdout, "{}", termion::cursor::Show).unwrap();
     }
 
     fn move_cursor(&mut self, value: &Point<i32>) {
@@ -128,5 +109,29 @@ impl Game {
             CellState::Flagged => CellState::Default,
             _ => current_cell.state,
         }
+    }
+
+    fn display(&self) -> String {
+        let mut result: Vec<String> = vec![];
+
+        for (j, row) in self.board.grid.iter().enumerate() {
+            let mut row_result: Vec<String> = vec![];
+            for (i, cell) in row.iter().enumerate() {
+                let c: String = match cell.state {
+                    CellState::Default => color_fg(String::from("?"), color::LightRed),
+                    CellState::Revealed => cell.value.to_string_colored(),
+                    CellState::Flagged => color_fg(String::from("F"), color::Rgb(128, 0, 128)),
+                };
+
+                row_result.push(if (Point { x: i, y: j }) == self.cursor_coord {
+                    color_bg(c, color::LightBlack)
+                } else {
+                    c
+                })
+            }
+            result.push(row_result.join(" "));
+        }
+
+        result.join("\r\n")
     }
 }
