@@ -21,6 +21,12 @@ impl Board {
         }
     }
 
+    pub fn shuffle_bombs(board: &Board) -> Self {
+        Board::new(board.size)
+            .populate(board.bomb_coords.iter().len())
+            .unwrap()
+    }
+
     pub fn populate(mut self, bomb_count: usize) -> Result<Board, &'static str> {
         self.place_bombs(bomb_count)?;
         self.increment_numbers_around_bombs()?;

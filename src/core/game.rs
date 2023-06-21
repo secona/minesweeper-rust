@@ -197,7 +197,7 @@ impl Game {
     }
 
     fn reset(&mut self) {
-        self.board.reset();
+        self.board = Board::shuffle_bombs(&self.board);
         self.cursor_coord = Point { x: 0, y: 0 };
     }
 
