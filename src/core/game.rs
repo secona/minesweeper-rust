@@ -49,6 +49,10 @@ impl Game {
         self.stdout.flush().unwrap();
 
         loop {
+            if self.has_won() {
+                break;
+            }
+
             let c = self.stdin.next().unwrap().unwrap();
             write!(self.stdout, "{}{}", cursor::Goto(1, 1), clear::AfterCursor).unwrap();
 
@@ -67,13 +71,39 @@ impl Game {
             self.stdout.flush().unwrap();
         }
 
+        loop {
+            write!(
+                self.stdout,
+                "{}{}{}{}congratulations! press r to play again! press q to exit",
+                cursor::Goto(1, 1),
+                clear::AfterCursor,
+                self.display(),
+                cursor::Goto(1, (self.board.size + 1) as u16)
+            )
+            .unwrap();
+            self.stdout.flush().unwrap();
+
+            let c = self.stdin.next().unwrap().unwrap();
+
+            match c {
+                Key::Char('R') | Key::Char('r') => {
+                    self.reset();
+                    self.play();
+                }
+                Key::Char('Q') | Key::Char('q') | Key::Ctrl('C') | Key::Ctrl('c') => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+
         write!(self.stdout, "{}", termion::cursor::Show).unwrap();
     }
 
     fn game_over(&mut self) {
         write!(
             self.stdout,
-            "{}{}game over! press r to restart!",
+            "{}{}game over! press r to restart! press q to exit!",
             self.display(),
             cursor::Goto(1, (self.board.size + 1) as u16),
         )
@@ -169,5 +199,19 @@ impl Game {
     fn reset(&mut self) {
         self.board.reset();
         self.cursor_coord = Point { x: 0, y: 0 };
+    }
+
+    fn has_won(&self) -> bool {
+        for row in self.board.grid.iter() {
+            for cell in row.iter() {
+                if let CellValue::Number(_) = cell.value {
+                    if cell.state == CellState::Default {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        true
     }
 }
