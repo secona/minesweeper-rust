@@ -6,6 +6,7 @@ use crate::util::colors::color_bg;
 use crate::util::colors::color_fg;
 use std::io;
 use std::io::Write;
+use std::process;
 use termion::clear;
 use termion::color;
 use termion::cursor;
@@ -69,6 +70,33 @@ impl Game {
         write!(self.stdout, "{}", termion::cursor::Show).unwrap();
     }
 
+    fn game_over(&mut self) {
+        write!(
+            self.stdout,
+            "{}{}game over! press r to restart!",
+            self.display(),
+            cursor::Goto(1, (self.board.size + 1) as u16),
+        )
+        .unwrap();
+        self.stdout.flush().unwrap();
+
+        loop {
+            let c = self.stdin.next().unwrap().unwrap();
+            match c {
+                Key::Char('R') | Key::Char('r') => {
+                    self.reset();
+                    self.play();
+                }
+                Key::Char('Q') | Key::Char('q') | Key::Ctrl('C') | Key::Ctrl('c') => {
+                    write!(self.stdout, "{}", cursor::Show).unwrap();
+                    self.stdout.flush().unwrap();
+                    process::exit(0);
+                }
+                _ => (),
+            }
+        }
+    }
+
     fn move_cursor(&mut self, value: &Point<i32>) {
         let new_coord = self.cursor_coord.offset_and_limit(value, self.board.size);
 
@@ -78,14 +106,17 @@ impl Game {
     }
 
     fn reveal(&mut self, point: Point) {
-        let current_cell = &mut self.board.grid[point.y][point.x];
-        if current_cell.state == CellState::Flagged {
+        if self.board.grid[point.y][point.x].state == CellState::Flagged {
             return;
         }
 
-        current_cell.state = CellState::Revealed;
+        if self.board.grid[point.y][point.x].value == CellValue::Bomb {
+            self.game_over();
+        }
 
-        if current_cell.value == CellValue::Number(0) {
+        self.board.grid[point.y][point.x].state = CellState::Revealed;
+
+        if self.board.grid[point.y][point.x].value == CellValue::Number(0) {
             for neighbor_coord in point.neighboring_points(self.board.size) {
                 let cell = &self.board.grid[neighbor_coord.y][neighbor_coord.x];
                 if CellState::Default == cell.state {
@@ -133,5 +164,10 @@ impl Game {
         }
 
         result.join("\r\n")
+    }
+
+    fn reset(&mut self) {
+        self.board.reset();
+        self.cursor_coord = Point { x: 0, y: 0 };
     }
 }

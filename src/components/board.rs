@@ -1,3 +1,4 @@
+use super::cell_state::CellState;
 use super::cell_value::CellValue;
 use crate::components::Cell;
 use crate::components::Point;
@@ -62,6 +63,14 @@ impl Board {
         }
 
         Ok(())
+    }
+
+    pub fn reset(&mut self) {
+        for row in self.grid.iter_mut() {
+            for cell in row.iter_mut() {
+                cell.state = CellState::Default;
+            }
+        }
     }
 }
 
